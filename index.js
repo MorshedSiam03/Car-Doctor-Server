@@ -29,7 +29,17 @@ async function run() {
 
     const serviceCollection = client.db("Car_Doctor_User").collection('Services');
     const orderCollection = client.db("Car_Doctor_User").collection('Orders');
+    const productCollection = client.db("Car_Doctor_User").collection('products');
+    const teamCollection = client.db("Car_Doctor_User").collection('team');
+    const reviewCollection = client.db("Car_Doctor_User").collection('review');
 
+    app.post('/services', async(req,res)=>{
+      const services = req.body;
+      console.log(services);
+      const result = await serviceCollection.insertOne(services);
+      res.send(result);
+    })
+    
     app.get('/services', async(req, res)=>{
         const cursor = serviceCollection.find();
         const result = await cursor.toArray();
@@ -39,11 +49,9 @@ async function run() {
     app.get('/services/:id', async(req, res)=>{
       const id = req.params.id;
       const query = { _id: new ObjectId(id) }
-
       // const options = {
       //   projection: { title: 1, price:1, }
       // }
-
       const result = await serviceCollection.findOne(query);
       res.send(result);
     })
@@ -61,6 +69,65 @@ async function run() {
       res.send(result);
     })
 
+    //Team
+    app.post('/teams', async(req,res)=>{
+      const teams = req.body;
+      console.log(teams);
+      const result = await teamCollection.insertOne(teams);
+      res.send(result);
+    })
+
+    app.get('/teams', async(req, res)=>{
+      const result = await teamCollection.find().toArray();
+      res.send(result);
+    })
+
+    //Review
+    app.post('/reviews', async(req,res)=>{
+      const reviews = req.body;
+      console.log(reviews);
+      const result = await reviewCollection.insertOne(reviews);
+      res.send(result);
+    })
+    app.get('/reviews', async(req, res)=>{
+      const result = await reviewCollection.find().toArray();
+      res.send(result);
+    })
+
+    app.patch('/orders/:id', async(req, res)=>{
+      const id = req.params.id;
+      const filter = { _id: new ObjectId(id)};
+      const updatedOrders = req.body;
+      const updateDoc ={
+        $set: {
+          status: updatedOrders.status
+        },
+      };
+      const result = await orderCollection.updateOne(filter, updateDoc);
+      res.send(result);
+    })
+
+    app.delete('/orders/:id', async(req, res)=>{
+      const id = req.params.id;
+      const query = {_id: new ObjectId(id)}
+      const result = await orderCollection.deleteOne(query);
+      res.send(result);
+    })
+
+
+    //Products
+    app.post('/products', async(req,res)=>{
+      const products = req.body;
+      console.log(products);
+      const result = await productCollection.insertOne(products);
+      res.send(result);
+    })
+
+    app.get('/products', async(req, res)=>{
+      const result = await productCollection.find().toArray();
+      res.send(result);
+    })
+
     // Send a ping to confirm a successful connection
     await client.db("admin").command({ ping: 1 });
     console.log("Pinged your deployment. You successfully connected to MongoDB!");
@@ -70,7 +137,6 @@ async function run() {
   }
 }
 run().catch(console.dir);
-
 
 
 app.get('/',(req, res)=>{
